@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@types/p5": "^1.7.6",
+    "p5": "^1.9.4"
+  },
+  "scripts": {
+    "dev": "node ./.esbuild.cjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5",
+    "html-validate": "^8.20.1"
+  }
+}
