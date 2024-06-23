@@ -1,20 +1,13 @@
 module.exports = {
   root: true,
-  env: {
-    browser: true,
-    es2020: true,
-  },
-  languageOptions: {
-      ecmaVersion: 6,
-      sourceType: "module"
-  },
-  // extends: [
-  //   "eslint:recommended",
-  //   "plugin:@typescript-eslint/recommended",
+  env: { browser: true, es2020: true },
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
   //   "plugin:react-hooks/recommended"
-  // ],
+  ],
   ignorePatterns: ["dist"],
-  // parser: "@typescript-eslint/parser",
+  parser: "@typescript-eslint/parser",
   // plugins: ["react-refresh"],
   rules: {
     "arrow-body-style": ["off", "as-needed"],
@@ -25,7 +18,7 @@ module.exports = {
     "curly": ["error", "all"],
     "object-curly-spacing": ["error", "always"],
     "eqeqeq": ["warn", "smart"],
-    "func-names": ["off"],
+    "func-names": ["warn"],
     "indent": ["error", 2],
     "max-classes-per-file": ["off"],
     "max-len":

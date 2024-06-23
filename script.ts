@@ -6,25 +6,24 @@ var initArrayWrappedForEach = (img: any, widthNum: number, heightNum: number): t
       var i = 0, j = 0, rowOffset = 0;
       i < widthNum && j < heightNum;
       i + 1 === widthNum
-        ? (i = 0, j++, rowOffset = j * widthNum)
+        ? (i = 0, j++, rowOffset += widthNum)
         : i++
     ) {
       callback(
         img, {
-        cells: this,
-        current: this[i + j * widthNum],
-        i,
-        j,
-        width: widthNum,
-        height: heightNum,
-        rowOffset: rowOffset
-      });
+          cells: this,
+          currentIndex: i + rowOffset,
+          i,
+          j,
+          width: widthNum,
+          height: heightNum,
+          rowOffset
+        });
     }
   };
 };
 
 function shuffle(first = 0, last = this.length - 1) {
-  // var length = last - first;
   var result: string[] = [];
   while(last-- >= first) {
     const j = Math.floor(Math.random() * (last + 1));
@@ -32,7 +31,7 @@ function shuffle(first = 0, last = this.length - 1) {
     result.push(this[last]);
   }
   return result;
-};
+}
 
 Array.prototype.shuffle = shuffle;
 
@@ -67,7 +66,7 @@ var sketch = (p: p5) => {
     sideDivider,
     cellWidth,
     cellHeight,
-    currentWidthNum, 
+    currentWidthNum,
     currentHeightNum = 0;
 
   var currentImage = null;
@@ -90,7 +89,7 @@ var sketch = (p: p5) => {
       : resolutionValue / img.width;
 
     return {
-      cells: 
+      cells:
         Array.from(
           { length: widthNum * heightNum },
           () => 0
@@ -103,18 +102,19 @@ var sketch = (p: p5) => {
   var mask = {
     empty: 0b0,
     alive: 0b10000,
-    aliveNext: 0b1000,
-    n: 0b111,
+    kill: 0b01111,
+    aliveNext: 0b01000,
+    n: 0b00111,
   };
 
   var generateCellsCallback = (
     img, {
-    cells,
-    i,
-    j,
-    width,
-  }) => {
-    cells[i + j * width] = img.get(
+      cells,
+      currentIndex,
+      i,
+      j,
+    }) => {
+    cells[currentIndex] = img.get(
       Math.floor(i / sideDivider),
       Math.floor(j / sideDivider)
     )[0] < 129
@@ -126,53 +126,47 @@ var sketch = (p: p5) => {
 
   var cellIsAliveNextGenerationCallback = (_, {
     cells,
-    current,
+    currentIndex,
     i,
     j,
     width,
     height,
-    rowOffset
   }) => {
-    current = mask.empty | (current & mask.alive) | (current & mask.aliveNext);
     var nc = 0;
 
-    i - 1 > 0
-      && (cells[i - 1 + rowOffset] & mask.alive)
+    ((i - 1) > 0
+      && cells[currentIndex - 1] & mask.alive)
       && nc++;
 
-    i + 1 < width
-      && (cells[i + 1 + rowOffset] & mask.alive)
+    ((i + 1) < width
+      && cells[currentIndex + 1] & mask.alive)
       && nc++;
 
-    j - 1 > 0
-      && (cells[i + rowOffset - width] & mask.alive)
+    ((j - 1) > 0
+      && cells[currentIndex - width] & mask.alive)
       && nc++;
 
-    j + 1 < height
-      && (cells[i + rowOffset + width] & mask.alive)
+    ((j + 1) < height
+      && cells[currentIndex + width] & mask.alive)
       && nc++;
 
-    current |= nc;
-
-    if (
-      !(nc === 0
-      || nc === 2
-      || nc === 4
-    )) {
-      (cells[i + rowOffset] = current | mask.aliveNext);
-    }
+    cells[currentIndex] = (nc === 1 || nc === 3
+      ? cells[currentIndex] | mask.aliveNext
+      : cells[currentIndex] & mask.alive) | nc;
   };
 
   var drawCellsCallback = (_, {
-    current,
+    currentIndex,
+    cells,
     i,
     j,
   }) => {
-    (current & mask.aliveNext)
+    var current = cells[currentIndex];
+
+    current & mask.alive
       && (
-        p.fill(
-          palette[current & mask.n]
-        ),
+        // p.fill(palette[current & mask.n]),
+        p.fill("#4e4542"),
         p.rect(i * cellWidth,
           j * cellHeight,
           cellWidth,
@@ -183,22 +177,19 @@ var sketch = (p: p5) => {
 
   var resetGenerationCallback = (_, {
     cells,
-    current,
-    i,
-    rowOffset
+    currentIndex,
   }) => {
-    if (current & mask.aliveNext) {
-      current = current ^ mask.aliveNext;
-      cells[i + rowOffset] = current | mask.alive;
-    }
-    // cells[i + rowOffset] = current << 1 & (1 << Math.floor(Math.log2(Math.abs(current))) + 1) - 1;
+    cells[currentIndex] =
+    cells[currentIndex] & mask.aliveNext
+      ? cells[currentIndex] | mask.alive
+      : cells[currentIndex] & 0;
   };
 
   p.setup = () => {
     p.loadImage("img3.jpg", imageLoaded);
     p.colorMode("hsb", 360, 100, 100, 100);
     p.createCanvas(canvasWidth, canvasHeight);
-    p.frameRate(4);
+    p.frameRate(1);
     p.noStroke();
   };
 
@@ -214,14 +205,17 @@ var sketch = (p: p5) => {
   const firstCycleCallback = (cells, img) => {
     p.image(img, 0, 0, canvasWidth, canvasHeight);
     p.background(bgc);
+
+    /** @todo check if it’s necessary */
     cells.wrappedForEach(generateCellsCallback);
+
     p.draw = drawCallback.bind(null, cells);
   };
 
   var imageLoaded = (img) => {
     currentImage = img;
     var { cells, widthNum, heightNum } = updateResolution(resolutionInput.value, img);
-    
+
     Array.prototype.wrappedForEach = initArrayWrappedForEach(img, widthNum, heightNum);
 
     cells.wrappedForEach(generateCellsCallback);
