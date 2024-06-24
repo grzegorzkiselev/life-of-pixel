@@ -118,25 +118,16 @@ var isCellAliveInNextGenerationCallback = ({
 };
 
 var colorSet = [
-  // "#f0ba00",
-  // "#de8790",
-  // "#6b1f1c",
-  // "#333c7d",
-  // "#367148",
-  // "#91b9d6",
-  // "#aa2404"
-  new Uint8Array([255, 0, 0, 255]),
-  new Uint8Array([0, 255, 0, 255]),
-  new Uint8Array([0, 0, 255, 255]),
-  new Uint8Array([255, 255, 0, 255]),
-  new Uint8Array([0, 255, 255, 255]),
-  new Uint8Array([255, 0, 255, 255]),
+  "#f0ba00",
+  "#de8790",
+  "#6b1f1c",
+  "#333c7d",
+  "#367148",
+  "#91b9d6",
+  "#aa2404",
 ];
 
 var palette = colorSet.shuffle(0, 5);
-
-var imageArray;
-// var imageBuff = new Uint8ClampedArray();
 
 var drawCellsCallback = ({
   currentIndex,
@@ -149,74 +140,22 @@ var drawCellsCallback = ({
 }) => {
   var current = cells[currentIndex];
 
-  // current & mask.alive
-  // && (
-  //   context.fillStyle = palette[current & mask.n],
-  //   context.fillRect(
-  //     i * cellWidth,
-  //     j * cellHeight,
-  //     cellWidth,
-  //     cellHeight,
-  //   )
-  // );
-
-  for (var offsetW = 0; offsetW < cellWidth; offsetW++) {
-    for (var offsetH = 0; offsetH < cellWidth; offsetH++) {
-      var indices = getColorIndicesByCoordinates(
-        Math.floor(i * cellWidth) + offsetW,
-        Math.floor(j * cellWidth) + offsetH,
-        canvasWidth
-      );
-
-      if (current & mask.alive) {
-        var currentColor = palette[current & mask.n];
-        imageArray[indices[0]] = currentColor[0]; // 0 * 4 = 0
-        imageArray[indices[1]] = currentColor[1]; // 0 * 4 + 1 = 1
-        imageArray[indices[2]] = currentColor[2]; // 0 * 4 + 2 = 2
-        imageArray[indices[3]] = currentColor[3]; // 0 * 4 + 3 = 3
-      } else {
-        imageArray[indices[0]] = 0;
-        imageArray[indices[1]] = 0;
-        imageArray[indices[2]] = 0;
-        imageArray[indices[3]] = 0;
-      }
-
-      // if (current & mask.alive) {
-      //   var currentColor = palette[current & mask.n];
-      //   // imageArray[indices[0] - step] = currentColor[0]; // 0 * 4 = 0
-      //   // imageArray[indices[1] - step] = currentColor[1]; // 0 * 4 + 1 = 1
-      //   // imageArray[indices[2] - step] = currentColor[2]; // 0 * 4 + 2 = 2
-      //   // imageArray[indices[3] - step] = currentColor[3]; // 0 * 4 + 3 = 3
-      //   imageArray[indices[0]] = 255; // 0 * 4 = 0
-      //   imageArray[indices[1]] = 0; // 0 * 4 + 1 = 1
-      //   imageArray[indices[2]] = 0; // 0 * 4 + 2 = 2
-      //   imageArray[indices[3]] = 255; // 0 * 4 + 3 = 3
-
-    // } else {
-    //   imageArray[indices[0]] = 0;
-    //   imageArray[indices[1]] = 0;
-    //   imageArray[indices[2]] = 0;
-    //   imageArray[indices[3]] = 0;
-    // }
-    }
-  }
-  // }
+  current & mask.alive
+  && (
+    context.fillStyle = palette[current & mask.n],
+    context.fillRect(
+      i * cellWidth,
+      j * cellHeight,
+      cellWidth,
+      cellHeight
+    )
+  );
 
   cells[currentIndex] =
     (current & mask.aliveNext)
       ? (current | mask.alive) & mask.dropN
       : mask.empty;
 };
-
-// var resetGenerationCallback = ({
-//   cells,
-//   currentIndex,
-// }) => {
-//   cells[currentIndex] =
-//     (cells[currentIndex] & mask.aliveNext)
-//       ? (cells[currentIndex] | mask.alive)
-//       : mask.empty;
-// };
 
 var resizeCanvas = (width, height, pr) => {
   canvas.width = width;
@@ -237,28 +176,16 @@ var drawCallback = (cells, canvasWidth, canvasHeight) => {
     cells.wrappedForEach(isCellAliveInNextGenerationCallback);
     context.clearRect(0, 0, canvasWidth, canvasHeight);
     cells.wrappedForEach(drawCellsCallback);
-
-    context.putImageData(
-      new ImageData(
-        new Uint8ClampedArray(
-          imageArray,
-        ),
-        canvasWidth,
-        canvasWidth
-      ), 0, 0
-    );
-
-    // imageArray.length = 0;
-
-    // context.beginPath();
-    // context.fill();
     clock = currentTime;
   }
 
-  currentRafId = requestAnimationFrame(drawCallback.bind(null, cells, canvasWidth, canvasHeight));
-  // setTimeout(() => {
-  //   drawCallback(cells, canvasWidth, canvasHeight);
-  // }, frameDuration);
+  currentRafId = requestAnimationFrame(
+    drawCallback.bind(
+      null,
+      cells,
+      canvasWidth,
+      canvasHeight
+    ));
 };
 
 var firstFrameCallback = (image) => {
@@ -285,8 +212,6 @@ var firstFrameCallback = (image) => {
   var wrappedForEach = initArrayWrappedForEach(widthNum, cellWidth, canvasWidth, heightNum, cellHeight, sideDivider);
   var cells = generateCellsCallback(rgbArray, widthNum, canvasWidth, heightNum, canvasHeight, sideDivider);
 
-  // Array.prototype.wrappedForEach = wrappedForEach;
-  imageArray = new Uint8ClampedArray(canvasWidth * canvasWidth * 4);
   Uint8Array.prototype.wrappedForEach = wrappedForEach;
   drawCallback(cells, canvasWidth, canvasHeight);
 };
@@ -314,7 +239,7 @@ window.addEventListener("resize", () => {
   firstFrameCallback(currentImage);
 });
 
-const controls = <HTMLInputElement>document.getElementById("controls");
+var controls = <HTMLInputElement>document.getElementById("controls");
 controls.addEventListener("dragover", () => {
   controls.classList.add("dragover");
 });
@@ -336,7 +261,7 @@ var getImageFromInput = () => {
 };
 
 var loadImageData = (file) => {
-  const reader = new FileReader();
+  var reader = new FileReader();
 
   reader.readAsDataURL(file);
   reader.onload = (readerEvent) => {
