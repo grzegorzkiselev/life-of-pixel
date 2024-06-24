@@ -1,7 +1,6 @@
 export var initArrayWrappedForEach = (
   widthNum: number,
   cellWidth: number,
-  canvasWidth: number,
   heightNum: number,
   cellHeight: number,
 ): typeof Uint8Array.prototype.wrappedForEach => {
@@ -19,9 +18,7 @@ export var initArrayWrappedForEach = (
         i,
         j,
         widthNum,
-        canvasWidth,
         heightNum,
-        rowOffset,
         cellWidth,
         cellHeight,
       });
@@ -29,12 +26,12 @@ export var initArrayWrappedForEach = (
   };
 };
 
-export function shuffle(first = 0, last = this.length - 1) {
+export var shuffle = (array, first = 0, last = array.length - 1) => {
   var result: string[] = [];
   while(last-- >= first) {
     const j = Math.floor(Math.random() * (last + 1));
-    [this[last], this[j]] = [this[j], this[last]];
-    result.push(this[last]);
+    [array[last], array[j]] = [array[j], array[last]];
+    result.push(array[last]);
   }
   return result;
-}
+};

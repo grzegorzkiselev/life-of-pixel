@@ -5,7 +5,7 @@ esbuild.context({
   bundle: true,
   platform: "browser",
   target: "esnext",
-  outfile: './script-dist.js',
+  outfile: './script.js',
   minify: true,
   sourcemap: "linked",
 })
