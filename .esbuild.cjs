@@ -1,11 +1,12 @@
 const esbuild = require('esbuild');
 
 esbuild.context({
-  entryPoints: ['./script.ts'],
+  entryPoints: ['./script.ts', './worker.ts'],
+  outdir: "./",
   bundle: true,
   platform: "browser",
   target: "esnext",
-  outfile: './script.js',
+  // outfile: './script.js',
   minify: true,
   sourcemap: "linked",
 })

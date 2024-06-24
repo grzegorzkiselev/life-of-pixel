@@ -26,12 +26,12 @@ export var initArrayWrappedForEach = (
   };
 };
 
-export var shuffle = (array, first = 0, last = array.length - 1) => {
-  var result: string[] = [];
-  while(last-- >= first) {
-    const j = Math.floor(Math.random() * (last + 1));
-    [array[last], array[j]] = [array[j], array[last]];
-    result.push(array[last]);
+export var shuffle = (array) => {
+  var result = [...array];
+  var i = array.length;
+  while(i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
 };
