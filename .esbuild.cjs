@@ -10,10 +10,6 @@ esbuild.context({
   sourcemap: "linked",
 })
 .then((ctx) => {
-  ctx.watch();
-  return ctx;
-})
-.then((ctx) => {
   return ctx.serve({
     servedir: "./",
     host: "localhost",

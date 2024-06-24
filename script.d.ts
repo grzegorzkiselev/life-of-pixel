@@ -3,12 +3,15 @@ interface WrappedForEachParams {
   currentIndex: number,
   i: number,
   j: number,
-  width: number,
-  height: number,
-  rowOffset: number
+  widthNum: number,
+  cellWidth: number,
+  heightNum: number,
+  cellHeight: number,
+  rowOffset: number,
 }
 interface Array<T> {
   shuffle(first?: number, last?: number): T[],
-  WrappedForEachConstructor<U>(img: any, callback: (img: any, arg0: WrappedForEachParams) => U): void,
-  wrappedForEach<K>(callback: (img: any, arg0: WrappedForEachParams) => K): void,
+}
+interface Uint8Array {
+  wrappedForEach<K>(callback: (arg0: WrappedForEachParams) => K): void,
 }

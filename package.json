@@ -1,8 +1,4 @@
 {
-  "dependencies": {
-    "@types/p5": "^1.7.6",
-    "p5": "^1.9.4"
-  },
   "scripts": {
     "dev": "node ./.esbuild.cjs"
   },
