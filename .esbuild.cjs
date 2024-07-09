@@ -6,7 +6,6 @@ esbuild.context({
   bundle: true,
   platform: "browser",
   target: "esnext",
-  // outfile: './script.js',
   minify: true,
   sourcemap: "linked",
 })

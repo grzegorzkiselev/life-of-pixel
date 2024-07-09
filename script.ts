@@ -33,10 +33,6 @@ var resizeCanvas = (canvas, width, height, pr) => {
 };
 
 var prepareDataForWorker = (image) => {
-  // const side = canvasHeight = canvasWidth = getCanvasSide();
-  //   p.resizeCanvas(side, side);
-  //   cellWidth = canvasWidth / widthCount;
-  //   cellHeight = canvasHeight / heightCount;
   var canvasWidth = getCanvasSide(pr);
   var canvasHeight = canvasWidth;
   var resolution = Number(resolutionInput.value);
@@ -133,8 +129,7 @@ var setup = () => {
   var userFile = getImageFromInput();
   userFile
     ? loadImageData(userFile)
-    : loadImage(
-      defaultImage
-    );
+    : loadImage(defaultImage);
 };
+
 setup();
