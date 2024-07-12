@@ -5,6 +5,9 @@ import { initArrayWrappedForEach, shuffle } from "./monkeyPatches";
  */
 var canvas = null;
 var context = null;
+var helperCanvas = null;
+var helperImageData = null;
+var helperContext = null;
 
 /**
  * Cells
@@ -20,15 +23,55 @@ var mask = {
 };
 
 var currentResolution = 0;
+// var palette = shuffle([
+//   "#f0ba00",
+//   "#de8790",
+//   "#6b1f1c",
+//   "#333c7d",
+//   "#367148",
+//   "#91b9d6",
+//   "#aa2404",
+// ]).slice(0, 3);
+
 var palette = shuffle([
-  "#f0ba00",
-  "#de8790",
-  "#6b1f1c",
-  "#333c7d",
-  "#367148",
-  "#91b9d6",
-  "#aa2404",
-]).slice(0, 3);
+  new Uint8Array([255, 0, 0, 255]),
+  new Uint8Array([0, 255, 0, 255]),
+  new Uint8Array([0, 0, 255, 255]),
+  new Uint8Array([255, 255, 0, 255]),
+  new Uint8Array([0, 255, 255, 255]),
+  new Uint8Array([255, 0, 255, 255]),
+]);
+
+// context.putImageData(
+//       new ImageData(
+//         new Uint8ClampedArray(
+//           imageArray,
+//         ),
+//         canvasWidth,
+//         canvasWidth
+//       ), 0, 0
+//     );
+
+// for (var offsetW = 0; offsetW < cellWidth; offsetW++) {
+//     for (var offsetH = 0; offsetH < cellWidth; offsetH++) {
+//       var indices = getColorIndicesByCoordinates(
+//         Math.floor(i * cellWidth) + offsetW,
+//         Math.floor(j * cellWidth) + offsetH,
+//         canvasWidth
+//       );
+
+//       if (current & mask.alive) {
+//         var currentColor = palette[current & mask.n];
+//         imageArray[indices[0]] = currentColor[0]; // 0 * 4 = 0
+//         imageArray[indices[1]] = currentColor[1]; // 0 * 4 + 1 = 1
+//         imageArray[indices[2]] = currentColor[2]; // 0 * 4 + 2 = 2
+//         imageArray[indices[3]] = currentColor[3]; // 0 * 4 + 3 = 3
+//       } else {
+//         imageArray[indices[0]] = 0;
+//         imageArray[indices[1]] = 0;
+//         imageArray[indices[2]] = 0;
+//         imageArray[indices[3]] = 0;
+//       }
 
 /**
  * Render
@@ -134,16 +177,30 @@ var drawCellsCallback = ({
 }) => {
   var current = cells[currentIndex];
 
-  current & mask.alive
-  && (
-    context.fillStyle = palette[(current & mask.n) - 1],
-    context.fillRect(
-      i * cellWidth,
-      j * cellHeight,
-      cellWidth,
-      cellHeight
-    )
-  );
+  // current & mask.alive
+  // && (
+  //   context.fillStyle = palette[(current & mask.n) - 1],
+  //   context.fillRect(
+  //     i * cellWidth,
+  //     j * cellHeight,
+  //     cellWidth,
+  //     cellHeight
+  //   )
+  // );
+
+  const red = currentIndex * 4;
+  if (current & mask.alive) {
+    var currentColor = palette[current & mask.n];
+    helperImageData.data[red] = currentColor[0]; // 0 * 4 = 0
+    helperImageData.data[red + 1] = currentColor[1]; // 0 * 4 + 1 = 1
+    helperImageData.data[red + 2] = currentColor[2]; // 0 * 4 + 2 = 2
+    helperImageData.data[red + 3] = currentColor[3]; // 0 * 4 + 3 = 3
+  } else {
+    helperImageData.data[red] = 0;
+    helperImageData.data[red + 1] = 0;
+    helperImageData.data[red + 2] = 0;
+    helperImageData.data[red + 3] = 0;
+  }
 
   cells[currentIndex] =
     (current & mask.aliveNext)
@@ -156,8 +213,10 @@ var tick = (cells, canvasWidth, canvasHeight) => {
 
   if (currentTime - clock >= frameDuration) {
     cells.wrappedForEach(isCellAliveInNextGenerationCallback);
-    context.clearRect(0, 0, canvasWidth, canvasHeight);
     cells.wrappedForEach(drawCellsCallback);
+
+    helperContext.putImageData(helperImageData, 0, 0);
+    context.drawImage(helperCanvas, 0, 0, canvasWidth, canvasHeight);
     clock = currentTime;
   }
 
@@ -204,6 +263,10 @@ var processFirstFrame = (image, canvasWidth, canvasHeight, resolution) => {
   var wrappedForEach = initArrayWrappedForEach(widthNum, cellWidth, heightNum, cellHeight);
   var cells = generateCells(rgbArray, widthNum, canvasWidth, heightNum, canvasHeight, sideDivider);
 
+  helperCanvas = new OffscreenCanvas(widthNum, heightNum);
+  helperContext = helperCanvas.getContext("2d");
+  helperImageData = new ImageData(widthNum, heightNum);
+
   Uint8Array.prototype.wrappedForEach = wrappedForEach;
   tick(cells, canvasWidth, canvasHeight);
 };
@@ -221,6 +284,7 @@ addEventListener("message", (event) => {
   case "initCanvas":
     canvas = transferredCanvas;
     context = canvas.getContext("2d");
+    context.imageSmoothingEnabled = false;
     break;
   case "processFirstFrame":
     processFirstFrame(
