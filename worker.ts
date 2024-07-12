@@ -23,16 +23,6 @@ var mask = {
 };
 
 var currentResolution = 0;
-// var palette = shuffle([
-//   "#f0ba00",
-//   "#de8790",
-//   "#6b1f1c",
-//   "#333c7d",
-//   "#367148",
-//   "#91b9d6",
-//   "#aa2404",
-// ]).slice(0, 3);
-
 var palette = shuffle([
   new Uint8Array([255, 0, 0, 255]),
   new Uint8Array([0, 255, 0, 255]),
@@ -41,37 +31,6 @@ var palette = shuffle([
   new Uint8Array([0, 255, 255, 255]),
   new Uint8Array([255, 0, 255, 255]),
 ]);
-
-// context.putImageData(
-//       new ImageData(
-//         new Uint8ClampedArray(
-//           imageArray,
-//         ),
-//         canvasWidth,
-//         canvasWidth
-//       ), 0, 0
-//     );
-
-// for (var offsetW = 0; offsetW < cellWidth; offsetW++) {
-//     for (var offsetH = 0; offsetH < cellWidth; offsetH++) {
-//       var indices = getColorIndicesByCoordinates(
-//         Math.floor(i * cellWidth) + offsetW,
-//         Math.floor(j * cellWidth) + offsetH,
-//         canvasWidth
-//       );
-
-//       if (current & mask.alive) {
-//         var currentColor = palette[current & mask.n];
-//         imageArray[indices[0]] = currentColor[0]; // 0 * 4 = 0
-//         imageArray[indices[1]] = currentColor[1]; // 0 * 4 + 1 = 1
-//         imageArray[indices[2]] = currentColor[2]; // 0 * 4 + 2 = 2
-//         imageArray[indices[3]] = currentColor[3]; // 0 * 4 + 3 = 3
-//       } else {
-//         imageArray[indices[0]] = 0;
-//         imageArray[indices[1]] = 0;
-//         imageArray[indices[2]] = 0;
-//         imageArray[indices[3]] = 0;
-//       }
 
 /**
  * Render
@@ -170,23 +129,8 @@ var isCellAliveInNextGenerationCallback = ({
 var drawCellsCallback = ({
   currentIndex,
   cells,
-  cellWidth,
-  cellHeight,
-  i,
-  j,
 }) => {
   var current = cells[currentIndex];
-
-  // current & mask.alive
-  // && (
-  //   context.fillStyle = palette[(current & mask.n) - 1],
-  //   context.fillRect(
-  //     i * cellWidth,
-  //     j * cellHeight,
-  //     cellWidth,
-  //     cellHeight
-  //   )
-  // );
 
   const red = currentIndex * 4;
   if (current & mask.alive) {
